@@ -1,4 +1,3 @@
-import json
 import socket
 
 from pydis_classes import Error, CommandError
@@ -11,48 +10,29 @@ class Client:
         self.s.connect((host, port))
         self.messenger = PydisMessage(self.s)
 
-    def main(self, *input_data):
-        if not input_data:
-            input_data = input('Enter your message: ').split(' ')
-        if input_data[0] == 'exit':
-            return True
-        if len(input_data) > 3:
-            input_data[2] = ' '.join(input_data[2:])
-            input_data = input_data[:3]
-        if len(input_data) > 2:
-            input_data[2] = eval(input_data[2])
-        self.messenger.send_encoded(input_data)
+    def _request(self, *args):
+        self.messenger.send_encoded(args)
         print('Waiting for response message!')
         msg = self.messenger.receive_decoded()
         if isinstance(msg, Error):
             raise CommandError(msg.message)
-        print(f'Response from server: {msg}')
+        print('Response message received.')
+        return msg
 
-    @staticmethod
-    def parse_input(input_data: str):
-        try:
-            return int(input_data)
-        except ValueError:
-            pass
-        try:
-            return json.loads(input_data)
-        except json.decoder.JSONDecodeError:
-            pass
-        return input_data
+    def get(self, key):
+        return self._request('GET', key)
 
-    def loop(self):
-        while True:
-            try:
-                is_break = self.main()
-                if is_break:
-                    break
-            except KeyboardInterrupt:
-                print('\nThanks for using our product!')
-                exit()
-            except CommandError as ce:
-                print(ce.args[0])
+    def set(self, key, value):
+        return self._request('SET', key, value)
 
+    def delete(self, key):
+        return self._request('DELETE', key)
 
-if __name__ == '__main__':
-    client = Client()
-    client.loop()
+    def flush(self):
+        return self._request('FLUSH')
+
+    def mget(self, *keys):
+        return self._request('MGET', *keys)
+
+    def mset(self, *items):
+        return self._request('MSET', *items)

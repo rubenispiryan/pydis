@@ -17,8 +17,6 @@ class PydisMessage:
         self.w_buffer.flush()
 
     def send_encoded(self, data):
-        # self.w_buffer.write(data[0].encode('utf-8') + b'|')
-        # self.w_buffer.write(data[1].encode('utf-8') + b'|')
         self.pydis_encoder.pydis_encode(data)
         self.w_buffer.flush()
 

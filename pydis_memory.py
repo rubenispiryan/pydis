@@ -56,4 +56,4 @@ class PydisMemory:
         data = zip(items[::2], items[1::2])
         for key, value in data:
             self._kv[key] = value
-        return len(items//2)
+        return len(items) // 2
